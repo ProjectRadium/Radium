@@ -2084,6 +2084,13 @@ bool CBlock::AcceptBlock()
     CBlockIndex* pindexPrev = (*mi).second;
     int nHeight = pindexPrev->nHeight+1;
 
+    // DoS protection for the spread fees fork
+    if (TestNet() && nHeight+1 >= AVG_FEE_START_BLOCK_TESTNET && nVersion < 8)
+        return DoS(100, error("AcceptBlock() : reject too old nVersion (Avg fee) = %d", nVersion));
+    
+    if (!TestNet() && nHeight+1 >= AVG_FEE_START_BLOCK && nVersion < 8)
+        return DoS(100, error("AcceptBlock() : reject too old nVersion (Avg fee) = %d", nVersion));
+
     if (IsProtocolV2(nHeight) && nVersion < 7)
         return DoS(100, error("AcceptBlock() : reject too old nVersion = %d", nVersion));
     //else if (!IsProtocolV2(nHeight) && nVersion > 6)
@@ -2934,12 +2941,58 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         CAddress addrFrom;
         uint64_t nNonce = 1;
         vRecv >> pfrom->nVersion >> pfrom->nServices >> nTime >> addrMe;
-        if (pfrom->nVersion < MIN_PEER_PROTO_VERSION)
+
+        // If running on the testnet...
+        if (TestNet())
         {
-            // disconnect from peers older than this proto version
-            LogPrintf("partner %s using obsolete version %i; disconnecting\n", pfrom->addr.ToString(), pfrom->nVersion);
-            pfrom->fDisconnect = true;
-            return false;
+            // If the testnet is the forked testnet...
+            if (pindexBest->nHeight + 1 >= AVG_FEE_START_BLOCK_TESTNET)
+            {
+                if (pfrom->nVersion < PROTOCOL_VERSION)
+                {
+                    // Disconnect from testnet peers older than this protocol version
+                    LogPrintf("partner %s using obsolete version %i; disconnecting\n", pfrom->addr.ToString(), pfrom->nVersion);
+                    pfrom->fDisconnect = true;
+                    return false;
+                }
+            }
+            // If the testnet is not forked...
+            else
+            {
+                if (pfrom->nVersion < MIN_PEER_PROTO_VERSION)
+                {
+                    // Disconnect from testnet peers older than this protocol version
+                    LogPrintf("partner %s using obsolete version %i; disconnecting\n", pfrom->addr.ToString(), pfrom->nVersion);
+                    pfrom->fDisconnect = true;
+                    return false;
+                }
+            }
+        }
+        // If running on the mainnet...
+        else
+        {
+            // If the mainnet is the forked mainnet...
+            if (pindexBest->nHeight + 1 >= AVG_FEE_START_BLOCK)
+            {
+                if (pfrom->nVersion < PROTOCOL_VERSION)
+                {
+                    // Disconnect from testnet peers older than this protocol version
+                    LogPrintf("partner %s using obsolete version %i; disconnecting\n", pfrom->addr.ToString(), pfrom->nVersion);
+                    pfrom->fDisconnect = true;
+                    return false;
+                }
+            }
+            // If the mainnet is not forked...
+            else
+            {
+                if (pfrom->nVersion < MIN_PEER_PROTO_VERSION)
+                {
+                    // Disconnect from testnet peers older than this protocol version
+                    LogPrintf("partner %s using obsolete version %i; disconnecting\n", pfrom->addr.ToString(), pfrom->nVersion);
+                    pfrom->fDisconnect = true;
+                    return false;
+                }
+            }
         }
 
         if (pfrom->nVersion == 10300)
