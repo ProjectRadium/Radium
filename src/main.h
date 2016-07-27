@@ -143,6 +143,11 @@ uint256 WantedByOrphan(const COrphanBlock* pblockOrphan);
 const CBlockIndex* GetLastBlockIndex(const CBlockIndex* pindex, bool fProofOfStake);
 void ThreadStakeMiner(CWallet *pwallet);
 
+static const signed int AVG_FEE_START_BLOCK = 619480;
+static const signed int AVG_FEE_START_BLOCK_TESTNET = 123000;
+static const signed int AVG_FEE_SPAN = 1440;
+int64_t GetRunningFee(int64_t nFees);
+
 
 /** (try to) add transaction to memory pool **/
 bool AcceptToMemoryPool(CTxMemPool& pool, CTransaction &tx, bool fLimitFree,

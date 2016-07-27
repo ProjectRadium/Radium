@@ -73,6 +73,7 @@ size_t nOrphanBlocksSize = 0;
 
 map<uint256, CTransaction> mapOrphanTransactions;
 map<uint256, set<uint256> > mapOrphanTransactionsByPrev;
+map<int,int64_t> mapFeeCache;
 
 // Constant stuff for coinbase transactions we create:
 CScript COINBASE_FLAGS;
@@ -1029,18 +1030,104 @@ int64_t GetProofOfStakeReward(const CBlockIndex* pindexPrev, int64_t nCoinAge, i
     {
 		nSubsidy = 1.5 * COIN;  // 7th reward drop
     }
-    else if(pindexBest->nHeight+1 >= 348080)
+    else if(pindexBest->nHeight+1 >= 348080 && pindexBest->nHeight+1 <= 874359)
     {
-		nSubsidy = 1 * COIN;  // 8th and final reward drop until further notice.
+		nSubsidy = 1 * COIN;  // 8th reward drop
+    }
+    else if(pindexBest->nHeight+1 >= 874360 && pindexBest->nHeight+1 <= 1133559)
+    {
+                nSubsidy = 0.75 * COIN; // First reward drop 6 months from the average fee fork.
+    }
+    else if(pindexBest->nHeight+1 >= 1133560 && pindexBest->nHeight+1 <= 1392759)
+    {
+                nSubsidy = 0.5 * COIN; // Second reward drop 12 months from the average fee fork.
+    }
+    else if(pindexBest->nHeight+1 >= 1392760)
+    {
+                nSubsidy = 0.25 * COIN; // Third and final reward drop 18 months from the average fee fork.
     }
 	
 	
 	if (fDebug && GetBoolArg("-printcreation", false))
     LogPrint("creation", "GetProofOfStakeReward(): create=%s nCoinAge=%d\n", FormatMoney(nSubsidy), nCoinAge);
 
-    return nSubsidy + nFees;
+
+    if(TestNet() && pindexBest->nHeight+1 >= AVG_FEE_START_BLOCK_TESTNET)
+    {
+        int64_t nRFee;
+        nRFee=GetRunningFee(nFees);
+        return nSubsidy + nRFee;
+    }
+    else if(!TestNet() && pindexBest->nHeight+1 >= AVG_FEE_START_BLOCK)
+    {
+        int64_t nRFee;
+        nRFee=GetRunningFee(nFees);
+        return nSubsidy + nRFee;
+    }
+    else
+    {
+        return nSubsidy + nFees;
+    }
+
 }
 
+//calculate fee average over AVG_FEE_SPAN blocks
+int64_t GetRunningFee(int64_t nFees){
+    int64_t nRFee=0;
+    int64_t nCumulatedFee=0;
+    int feesCount=0;
+    CBlock blockTmp;
+    CTxDB txdb("r");
+    CBlockIndex* pblockindexTmp = mapBlockIndex[hashBestChain];
+    int curHeight= pblockindexTmp->nHeight;
+    while (pblockindexTmp->nHeight > curHeight-(AVG_FEE_SPAN-1)){
+        int64_t blockFee=0;
+        if(mapFeeCache.count(pblockindexTmp->nHeight)){
+            blockFee=mapFeeCache[pblockindexTmp->nHeight];
+        }else{
+                uint256 hash = *pblockindexTmp->phashBlock;
+                pblockindexTmp = mapBlockIndex[hash];
+                blockTmp.ReadFromDisk(pblockindexTmp, true);
+                BOOST_FOREACH (CTransaction tx, blockTmp.vtx)
+                {
+                    if (!tx.IsCoinStake() && !tx.IsCoinBase()){
+                    int64_t nFee=0;
+                    MapPrevTx mapInputsTmp;
+                    map<uint256, CTxIndex> mapUnused;
+                    bool fInvalid = false;
+                    if (tx.FetchInputs(txdb, mapUnused, false, false, mapInputsTmp, fInvalid))
+                    {
+                    nFee=tx.GetValueIn(mapInputsTmp) - tx.GetValueOut();
+                    if (!MoneyRange(nFee)){
+                    nFee=0;
+                    }
+                    blockFee+=nFee;
+                    }
+                    }
+                }
+                if (!MoneyRange(blockFee)){
+                blockFee=0;
+                }
+                mapFeeCache[pblockindexTmp->nHeight]=blockFee;
+        }
+        nCumulatedFee+=blockFee;       
+        if (!MoneyRange(nCumulatedFee)){
+        nCumulatedFee=0;
+        }
+       // LogPrintf("%d---------------------->blockFee:%d\n",pblockindexTmp->nHeight,(int)blockFee);
+       // LogPrintf("---------------------->nCumulatedFee:%d\n",(int)nCumulatedFee);
+       // LogPrintf("---------------------->count:%d\n",(int)feesCount);
+       // LogPrintf("---------------------->avg:%d\n",(int64_t)((nCumulatedFee+nFees)/(feesCount+1)));
+        feesCount++;
+        pblockindexTmp = pblockindexTmp->pprev;
+    }
+    nRFee=(int64_t)((nCumulatedFee+nFees)/(feesCount+1));
+    if (!MoneyRange(nRFee))nRFee=0;
+    LogPrintf("---------------------->Fee:%d\n",(int)nFees);
+    LogPrintf("---------------------->RFee:%d\n",(int)nRFee);
+    if(mapFeeCache.size()>50000)mapFeeCache.clear(); //clear cache if it gets too big to avoid memory bloating
+    return nRFee;
+}
 static const int64_t nTargetTimespan = 1 * 60;  // 1 min
 static const int64_t nTargetTimespanNEW = 15 * 60;  // 15 min
 
