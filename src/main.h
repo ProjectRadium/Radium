@@ -92,7 +92,6 @@ extern bool fHaveGUI;
 
 // Settings
 extern bool fUseFastIndex;
-extern bool fListChange;
 extern unsigned int nDerivationMethodIndex;
 
 // Minimum disk space required - used in CheckDiskSpace()
