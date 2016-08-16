@@ -1051,14 +1051,20 @@ int64_t GetProofOfStakeReward(const CBlockIndex* pindexPrev, int64_t nCoinAge, i
 	if (fDebug && GetBoolArg("-printcreation", false))
     LogPrint("creation", "GetProofOfStakeReward(): create=%s nCoinAge=%d\n", FormatMoney(nSubsidy), nCoinAge);
 
+    int avgHeight;
 
-    if(TestNet() && pindexBest->nHeight+1 >= AVG_FEE_START_BLOCK_TESTNET)
+    if(TestNet())
     {
-        int64_t nRFee;
-        nRFee=GetRunningFee(nFees);
-        return nSubsidy + nRFee;
+        avgHeight = AVG_FEE_START_BLOCK_TESTNET;
+    }else{
+        avgHeight = AVG_FEE_START_BLOCK;
     }
-    else if(!TestNet() && pindexBest->nHeight+1 >= AVG_FEE_START_BLOCK)
+
+    if(pindexBest->nHeight+1 >= AVG_FEE_START_BLOCK_REVERT)
+    {
+        return nSubsidy + nFees;
+    }
+    else if(pindexBest->nHeight+1 >= avgHeight)
     {
         int64_t nRFee;
         nRFee=GetRunningFee(nFees);
