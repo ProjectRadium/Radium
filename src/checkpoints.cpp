@@ -34,7 +34,13 @@ namespace Checkpoints
         ( 200000,   uint256("0x98b0bcf0218293549a30d938a1d641b6bc6b498361cb432e3fafd6935c592846") )
         ( 300000,   uint256("0xdcb25c38e2731a68d5bfa16b00b8479fed57c6a352cfd94d8e0dfdd690ac9ea2") )
         ( 440000,   uint256("0x88914855018cf647d1b20162eed2dbc7cdf69757f8216868c1b55687aafe1a75") )
-    ;
+        ( 500000,   uint256("0x41950e8d38381ce56fc0fd9eca76e73b49ce256c01ab2521897c5c6285b39c8d") )
+        ( 550000,   uint256("0x8a39262d43135792a429a4e2a6deeb669c88b618ecfa3ca855edaf1e4c3631af") )
+        ( 600000,   uint256("0x23141467be3b6fe23419c8a9fbcd4df431b4b1abcd43a1fa689e7b6d137e89ef") )
+        ( 619480,   uint256("0x17895abf56169141d553891d00a4c46d37023250a0089800e389bfba37e91f9a") ) // avg_fee start block
+        ( 625249,   uint256("0x677def44b35e162452fb12f00c4e4fa5f1339a90a4b82753266e1cd9f5b359e7") ) // problem block on avg_fee
+        ( 626372,   uint256("0x977494d951029df80bee05bdd461e6e767c916c2b60ebd356133c38ae5cf5823") ) // pre avg_fee revert block
+      ;
 
     // TestNet has no checkpoints
     static MapCheckpoints mapCheckpointsTestnet;
