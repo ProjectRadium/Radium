@@ -1,5 +1,5 @@
 # Radium
-Radium is a proof of stake cryptocurrency, forming the backbone of Radon SmartChain services.
+Radium is a proof of stake cryptocurrency, forming the backbone of Radium SmartChain services.
 
 Development Schedule
 ===========================
