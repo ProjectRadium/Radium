@@ -73,7 +73,7 @@ size_t nOrphanBlocksSize = 0;
 
 map<uint256, CTransaction> mapOrphanTransactions;
 map<uint256, set<uint256> > mapOrphanTransactionsByPrev;
-map<int,int64_t> mapFeeCache;
+map<const uint256* ,int64_t> mapFeeCache;
 
 // Constant stuff for coinbase transactions we create:
 CScript COINBASE_FLAGS;
@@ -1088,8 +1088,11 @@ int64_t GetRunningFee(int64_t nFees){
     int curHeight= pblockindexTmp->nHeight;
     while (pblockindexTmp->nHeight > curHeight-(AVG_FEE_SPAN-1)){
         int64_t blockFee=0;
-        if(mapFeeCache.count(pblockindexTmp->nHeight)){
-            blockFee=mapFeeCache[pblockindexTmp->nHeight];
+        if(mapFeeCache.count(pblockindexTmp->phashBlock)){
+            blockFee=mapFeeCache[pblockindexTmp->phashBlock];
+            if (blockFee > 0) {
+                LogPrintf("%d---------------------->retreived block fee:%d\n",pblockindexTmp->phashBlock,(int)blockFee);
+            }
         }else{
                 uint256 hash = *pblockindexTmp->phashBlock;
                 pblockindexTmp = mapBlockIndex[hash];
@@ -1114,13 +1117,14 @@ int64_t GetRunningFee(int64_t nFees){
                 if (!MoneyRange(blockFee)){
                 blockFee=0;
                 }
-                mapFeeCache[pblockindexTmp->nHeight]=blockFee;
+                mapFeeCache[pblockindexTmp->phashBlock]=blockFee;
+                LogPrintf("%d---------------------->Calculated New Fee:%d\n",pblockindexTmp->phashBlock,(int)blockFee);
         }
         nCumulatedFee+=blockFee;       
         if (!MoneyRange(nCumulatedFee)){
         nCumulatedFee=0;
         }
-       // LogPrintf("%d---------------------->blockFee:%d\n",pblockindexTmp->nHeight,(int)blockFee);
+        //LogPrintf("%d---------------------->blockFee:%d\n",pblockindexTmp->phashBlock,(int)blockFee);
        // LogPrintf("---------------------->nCumulatedFee:%d\n",(int)nCumulatedFee);
        // LogPrintf("---------------------->count:%d\n",(int)feesCount);
        // LogPrintf("---------------------->avg:%d\n",(int64_t)((nCumulatedFee+nFees)/(feesCount+1)));
