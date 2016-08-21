@@ -36,7 +36,7 @@ static const int PROTOCOL_VERSION = 99007;
 static const int INIT_PROTO_VERSION = 209;
 
 // disconnect from peers older than this proto version
-static const int MIN_PEER_PROTO_VERSION = 99006;
+static const int MIN_PEER_PROTO_VERSION = 99007;
 
 // nTime field added to CAddress, starting with this version;
 // if possible, avoid requesting addresses nodes older than this
@@ -44,16 +44,16 @@ static const int CADDR_TIME_VERSION = 31402;
 
 // only request blocks from nodes outside this range of versions
 static const int NORADSS_VERSION_START = 0;
-static const int NORADSS_VERSION_END = 99005;
+static const int NORADSS_VERSION_END = 99006;
 
 // BIP 0031, pong message, is enabled for all versions AFTER this one
-static const int BIP0031_VERSION = 60000;
+static const int BIP0031_VERSION = 99006;
 
 // "mempool" command, enhanced "getdata" behavior starts with this version:
 static const int MEMPOOL_GD_VERSION = 60002;
 
 // reject blocks with non-canonical signatures starting from this version
 static const int CANONICAL_BLOCK_SIG_VERSION = 90001;
-static const int CANONICAL_BLOCK_SIG_LOW_S_VERSION = 99005;
+static const int CANONICAL_BLOCK_SIG_LOW_S_VERSION = 99006;
 
 #endif

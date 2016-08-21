@@ -73,7 +73,7 @@ size_t nOrphanBlocksSize = 0;
 
 map<uint256, CTransaction> mapOrphanTransactions;
 map<uint256, set<uint256> > mapOrphanTransactionsByPrev;
-map<int,int64_t> mapFeeCache;
+map<const uint256* ,int64_t> mapFeeCache;
 
 // Constant stuff for coinbase transactions we create:
 CScript COINBASE_FLAGS;
@@ -1088,8 +1088,11 @@ int64_t GetRunningFee(int64_t nFees){
     int curHeight= pblockindexTmp->nHeight;
     while (pblockindexTmp->nHeight > curHeight-(AVG_FEE_SPAN-1)){
         int64_t blockFee=0;
-        if(mapFeeCache.count(pblockindexTmp->nHeight)){
-            blockFee=mapFeeCache[pblockindexTmp->nHeight];
+        if(mapFeeCache.count(pblockindexTmp->phashBlock)){
+            blockFee=mapFeeCache[pblockindexTmp->phashBlock];
+            if (blockFee > 0) {
+                LogPrintf("%d---------------------->retreived block fee:%d\n",pblockindexTmp->phashBlock,(int)blockFee);
+            }
         }else{
                 uint256 hash = *pblockindexTmp->phashBlock;
                 pblockindexTmp = mapBlockIndex[hash];
@@ -1114,13 +1117,14 @@ int64_t GetRunningFee(int64_t nFees){
                 if (!MoneyRange(blockFee)){
                 blockFee=0;
                 }
-                mapFeeCache[pblockindexTmp->nHeight]=blockFee;
+                mapFeeCache[pblockindexTmp->phashBlock]=blockFee;
+                LogPrintf("%d---------------------->Calculated New Fee:%d\n",pblockindexTmp->phashBlock,(int)blockFee);
         }
         nCumulatedFee+=blockFee;       
         if (!MoneyRange(nCumulatedFee)){
         nCumulatedFee=0;
         }
-       // LogPrintf("%d---------------------->blockFee:%d\n",pblockindexTmp->nHeight,(int)blockFee);
+        //LogPrintf("%d---------------------->blockFee:%d\n",pblockindexTmp->phashBlock,(int)blockFee);
        // LogPrintf("---------------------->nCumulatedFee:%d\n",(int)nCumulatedFee);
        // LogPrintf("---------------------->count:%d\n",(int)feesCount);
        // LogPrintf("---------------------->avg:%d\n",(int64_t)((nCumulatedFee+nFees)/(feesCount+1)));
@@ -3035,58 +3039,16 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         uint64_t nNonce = 1;
         vRecv >> pfrom->nVersion >> pfrom->nServices >> nTime >> addrMe;
 
-        // If running on the testnet...
-        if (TestNet())
+        if (pfrom->nVersion < MIN_PEER_PROTO_VERSION)
         {
-            // If the testnet is the forked testnet...
-            if (pindexBest->nHeight + 1 >= AVG_FEE_START_BLOCK_TESTNET)
-            {
-                if (pfrom->nVersion < PROTOCOL_VERSION)
-                {
-                    // Disconnect from testnet peers older than this protocol version
-                    LogPrintf("partner %s using obsolete version %i; disconnecting\n", pfrom->addr.ToString(), pfrom->nVersion);
-                    pfrom->fDisconnect = true;
-                    return false;
-                }
-            }
-            // If the testnet is not forked...
-            else
-            {
-                if (pfrom->nVersion < MIN_PEER_PROTO_VERSION)
-                {
-                    // Disconnect from testnet peers older than this protocol version
-                    LogPrintf("partner %s using obsolete version %i; disconnecting\n", pfrom->addr.ToString(), pfrom->nVersion);
-                    pfrom->fDisconnect = true;
-                    return false;
-                }
-            }
+           // Disconnect from peers older than this protocol version
+           LogPrintf("partner %s using obsolete version %i; disconnecting\n", pfrom->addr.ToString(), pfrom->nVersion);
+           pfrom->fDisconnect = true;
+           return false;
         }
-        // If running on the mainnet...
-        else
-        {
-            // If the mainnet is the forked mainnet...
-            if (pindexBest->nHeight + 1 >= AVG_FEE_START_BLOCK)
-            {
-                if (pfrom->nVersion < PROTOCOL_VERSION)
-                {
-                    // Disconnect from testnet peers older than this protocol version
-                    LogPrintf("partner %s using obsolete version %i; disconnecting\n", pfrom->addr.ToString(), pfrom->nVersion);
-                    pfrom->fDisconnect = true;
-                    return false;
-                }
-            }
-            // If the mainnet is not forked...
-            else
-            {
-                if (pfrom->nVersion < MIN_PEER_PROTO_VERSION)
-                {
-                    // Disconnect from testnet peers older than this protocol version
-                    LogPrintf("partner %s using obsolete version %i; disconnecting\n", pfrom->addr.ToString(), pfrom->nVersion);
-                    pfrom->fDisconnect = true;
-                    return false;
-                }
-            }
-        }
+
+
+
 
         if (pfrom->nVersion == 10300)
             pfrom->nVersion = 300;
