@@ -8,11 +8,14 @@ Development is primarily focused on Radium SmartChain services. Periodic mainten
 Version History
 ===========================
 Latest MANDATORY for MAINNET is 1.4.4.0
+
 Latest MANDATORY for TESTNET is 1.4.4.1
 
 
 1.4.4.1 Leasure   Fixes issue that caused failure of Average Fee Fork. Has no effect on main net. 
+
 1.4.4.0 MANDATORY Reverts the Average Fee Fork at block 626550
+
 1.4.3.0 MANDATORY Implementts Average Fee Fork at block 619480
 
 
