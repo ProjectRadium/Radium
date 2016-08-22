@@ -2182,10 +2182,10 @@ bool CBlock::AcceptBlock()
     int nHeight = pindexPrev->nHeight+1;
 
     // DoS protection for the spread fees fork
-    if (TestNet() && nHeight+1 >= AVG_FEE_START_BLOCK_TESTNET && nVersion < 8)
+    if (TestNet() && nHeight+1 >= AVG_FEE_START_BLOCK_TESTNET && nVersion < 7)
         return DoS(100, error("AcceptBlock() : reject too old nVersion (Avg fee) = %d", nVersion));
     
-    if (!TestNet() && nHeight+1 >= AVG_FEE_START_BLOCK && nVersion < 8)
+    if (!TestNet() && nHeight+1 >= AVG_FEE_START_BLOCK && nVersion < 7)
         return DoS(100, error("AcceptBlock() : reject too old nVersion (Avg fee) = %d", nVersion));
 
     if (IsProtocolV2(nHeight) && nVersion < 7)
