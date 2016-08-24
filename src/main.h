@@ -145,6 +145,7 @@ void ThreadStakeMiner(CWallet *pwallet);
 
 static const signed int AVG_FEE_START_BLOCK = 619480;
 static const signed int AVG_FEE_START_BLOCK_TESTNET = 123000;
+static const signed int AVG_FEE_START_BLOCK_TESTNET_REVERT = 160250;
 static const signed int AVG_FEE_SPAN = 1440;
 int64_t GetRunningFee(int64_t nFees);
 
