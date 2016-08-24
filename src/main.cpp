@@ -1052,15 +1052,23 @@ int64_t GetProofOfStakeReward(const CBlockIndex* pindexPrev, int64_t nCoinAge, i
     LogPrint("creation", "GetProofOfStakeReward(): create=%s nCoinAge=%d\n", FormatMoney(nSubsidy), nCoinAge);
 
     int avgHeight;
+    int avgHeightRevert;
 
     if(TestNet())
     {
         avgHeight = AVG_FEE_START_BLOCK_TESTNET;
+        avgHeightRevert  = AVG_FEE_START_BLOCK_TESTNET_REVERT;
     }else{
         avgHeight = AVG_FEE_START_BLOCK;
+	avgHeightRevert = AVG_FEE_START_BLOCK_REVERT;
     }
 
-    if(pindexBest->nHeight+1 >= AVG_FEE_START_BLOCK_REVERT)
+
+
+
+
+
+    if(pindexBest->nHeight+1 >= avgHeightRevert)
     {
         return nSubsidy + nFees;
     }
