@@ -1126,7 +1126,7 @@ int64_t GetRunningFee(int64_t nFees){
                 blockFee=0;
                 }
                 mapFeeCache[pblockindexTmp->phashBlock]=blockFee;
-                LogPrintf("%d---------------------->Calculated New Fee:%d\n",pblockindexTmp->phashBlock,(int)blockFee);
+                LogPrintf("%d---------------------->Calculated New Fee:%d\n",pblockindexTmp->phashBlock,(int64_t)blockFee);
         }
         nCumulatedFee+=blockFee;       
         if (!MoneyRange(nCumulatedFee)){
