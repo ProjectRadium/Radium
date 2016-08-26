@@ -1052,22 +1052,31 @@ int64_t GetProofOfStakeReward(const CBlockIndex* pindexPrev, int64_t nCoinAge, i
     LogPrint("creation", "GetProofOfStakeReward(): create=%s nCoinAge=%d\n", FormatMoney(nSubsidy), nCoinAge);
 
     int avgHeight;
+    int avgHeightRevert;
 
     if(TestNet())
     {
         avgHeight = AVG_FEE_START_BLOCK_TESTNET;
+        avgHeightRevert  = AVG_FEE_START_BLOCK_TESTNET_REVERT;
     }else{
         avgHeight = AVG_FEE_START_BLOCK;
+	avgHeightRevert = AVG_FEE_START_BLOCK_REVERT;
     }
 
-    if(pindexBest->nHeight+1 >= AVG_FEE_START_BLOCK_REVERT)
+
+
+
+
+
+    if(pindexBest->nHeight+1 >= avgHeightRevert)
     {
         return nSubsidy + nFees;
     }
     else if(pindexBest->nHeight+1 >= avgHeight)
     {
         int64_t nRFee;
-        nRFee=GetRunningFee(nFees);
+	int nHeight =  (pindexBest->nHeight+1);
+        nRFee=GetRunningFee(nFees, nHeight);
         return nSubsidy + nRFee;
     }
     else
@@ -1078,20 +1087,20 @@ int64_t GetProofOfStakeReward(const CBlockIndex* pindexPrev, int64_t nCoinAge, i
 }
 
 //calculate fee average over AVG_FEE_SPAN blocks
-int64_t GetRunningFee(int64_t nFees){
+int64_t GetRunningFee(int64_t nFees, int curHeight){
     int64_t nRFee=0;
     int64_t nCumulatedFee=0;
     int feesCount=0;
     CBlock blockTmp;
     CTxDB txdb("r");
     CBlockIndex* pblockindexTmp = mapBlockIndex[hashBestChain];
-    int curHeight= pblockindexTmp->nHeight;
+    
     while (pblockindexTmp->nHeight > curHeight-(AVG_FEE_SPAN-1)){
         int64_t blockFee=0;
         if(mapFeeCache.count(pblockindexTmp->phashBlock)){
             blockFee=mapFeeCache[pblockindexTmp->phashBlock];
             if (blockFee > 0) {
-                LogPrintf("%d---------------------->retreived block fee:%d\n",pblockindexTmp->phashBlock,(int)blockFee);
+                LogPrintf("height=%d hash=%s---------------------->retreived block fee:%d\n",pblockindexTmp->nHeight,pblockindexTmp->phashBlock->ToString(),(int)blockFee);
             }
         }else{
                 uint256 hash = *pblockindexTmp->phashBlock;
@@ -1118,7 +1127,7 @@ int64_t GetRunningFee(int64_t nFees){
                 blockFee=0;
                 }
                 mapFeeCache[pblockindexTmp->phashBlock]=blockFee;
-                LogPrintf("%d---------------------->Calculated New Fee:%d\n",pblockindexTmp->phashBlock,(int)blockFee);
+                LogPrintf("height=%d hash=%s---------------------->Calculated New Fee:%d\n",pblockindexTmp->nHeight,pblockindexTmp->phashBlock->ToString(),(int)blockFee);
         }
         nCumulatedFee+=blockFee;       
         if (!MoneyRange(nCumulatedFee)){
@@ -2182,7 +2191,9 @@ bool CBlock::AcceptBlock()
     int nHeight = pindexPrev->nHeight+1;
 
     // DoS protection for the spread fees fork
-    if (TestNet() && nHeight+1 >= AVG_FEE_START_BLOCK_TESTNET && nVersion < 8)
+    //  the +700 was added, because for some reasion version 7 blocks were included in the testnet up
+    //  untill block 123681, causing the dos code to prevent syncing.
+    if (TestNet() && nHeight+1 >= AVG_FEE_START_BLOCK_TESTNET + 700 && nVersion < 8)
         return DoS(100, error("AcceptBlock() : reject too old nVersion (Avg fee) = %d", nVersion));
     
     if (!TestNet() && nHeight+1 >= AVG_FEE_START_BLOCK && nVersion < 8)
