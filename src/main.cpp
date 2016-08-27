@@ -994,7 +994,7 @@ int64_t GetProofOfStakeReward(const CBlockIndex* pindexPrev, int64_t nCoinAge, i
     {
 		nSubsidy = 0 * COIN;  
     }	
-	if(pindexBest->nHeight+1 >= 2880 && pindexBest->nHeight+1 <= 30240)
+    else if(pindexBest->nHeight+1 >= 2880 && pindexBest->nHeight+1 <= 30240)
     {
 		nSubsidy = 25 * COIN;  
     }
@@ -1051,24 +1051,46 @@ int64_t GetProofOfStakeReward(const CBlockIndex* pindexPrev, int64_t nCoinAge, i
 	if (fDebug && GetBoolArg("-printcreation", false))
     LogPrint("creation", "GetProofOfStakeReward(): create=%s nCoinAge=%d\n", FormatMoney(nSubsidy), nCoinAge);
 
+
+
+
+    if(pindexBest->nHeight+1 >= 0 && pindexBest->nHeight+1 <= 2779)
+    {
+		nSubsidy = 0 * COIN;  
+    }	
+    else if(pindexBest->nHeight+1 >= 2880 && pindexBest->nHeight+1 <= 30240)
+    {
+		nSubsidy = 25 * COIN;  
+    }
+
+
+
     int avgHeight;
     int avgHeightRevert;
+    int avgHeightV2;
 
     if(TestNet())
     {
         avgHeight = AVG_FEE_START_BLOCK_TESTNET;
         avgHeightRevert  = AVG_FEE_START_BLOCK_TESTNET_REVERT;
+	avgHeightV2 = AVG_FEE_START_BLOCK_TESTNET_V2;
     }else{
         avgHeight = AVG_FEE_START_BLOCK;
 	avgHeightRevert = AVG_FEE_START_BLOCK_REVERT;
+        avgHeightV2 =  AVG_FEE_START_BLOCK_V2;
     }
 
 
 
 
-
-
-    if(pindexBest->nHeight+1 >= avgHeightRevert)
+   if(pindexBest->nHeight+1 >= avgHeightV2)
+    {
+        int64_t nRFee;
+	int curHeight =  (pindexBest->nHeight);
+        nRFee=GetRunningFee(nFees, curHeight);
+        return nSubsidy + nRFee;
+    }
+    else if(pindexBest->nHeight+1 >= avgHeightRevert)
     {
         return nSubsidy + nFees;
     }

@@ -144,12 +144,18 @@ const CBlockIndex* GetLastBlockIndex(const CBlockIndex* pindex, bool fProofOfSta
 void ThreadStakeMiner(CWallet *pwallet);
 
 static const signed int AVG_FEE_START_BLOCK = 619480;
+static const signed int AVG_FEE_START_BLOCK_REVERT = 626550;
+static const signed int AVG_FEE_START_BLOCK_V2 = 9999999;
+
 static const signed int AVG_FEE_START_BLOCK_TESTNET = 123000;
 static const signed int AVG_FEE_START_BLOCK_TESTNET_REVERT = 160250;
+static const signed int AVG_FEE_START_BLOCK_TESTNET_V2 = 164750;
+
+
 static const signed int AVG_FEE_SPAN = 1440;
 int64_t GetRunningFee(int64_t nFees, int curHeight);
 
-static const signed int AVG_FEE_START_BLOCK_REVERT = 626550;
+
 
 /** (try to) add transaction to memory pool **/
 bool AcceptToMemoryPool(CTxMemPool& pool, CTransaction &tx, bool fLimitFree,
