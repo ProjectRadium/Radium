@@ -11,9 +11,9 @@ Latest MANDATORY for MAINNET is 1.4.4.0
 
 Latest MANDATORY for TESTNET is 1.4.4.3
 
-1.4.4.3 TESTNET   Hardforks TESTNET to Average Fee V2 code.
+1.4.4.3 TESTNET   Hardforks TESTNET to Average Fee V2 code at block 164750.
 
-1.4.4.2 TESTNET   Hardforks TESTNET back to old code to test stablility. 
+1.4.4.2 TESTNET   Hardforks TESTNET back to old code to test stablility at block 160250. 
 
 1.4.4.1 TESTNET   Fixes issue that caused failure of Average Fee Fork. Has no effect on main net. 
 
