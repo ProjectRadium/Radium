@@ -1048,21 +1048,8 @@ int64_t GetProofOfStakeReward(const CBlockIndex* pindexPrev, int64_t nCoinAge, i
     }
 	
 	
-	if (fDebug && GetBoolArg("-printcreation", false))
+    if (fDebug && GetBoolArg("-printcreation", false))
     LogPrint("creation", "GetProofOfStakeReward(): create=%s nCoinAge=%d\n", FormatMoney(nSubsidy), nCoinAge);
-
-
-
-
-    if(pindexBest->nHeight+1 >= 0 && pindexBest->nHeight+1 <= 2779)
-    {
-		nSubsidy = 0 * COIN;  
-    }	
-    else if(pindexBest->nHeight+1 >= 2880 && pindexBest->nHeight+1 <= 30240)
-    {
-		nSubsidy = 25 * COIN;  
-    }
-
 
 
     int avgHeight;
