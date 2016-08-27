@@ -994,7 +994,7 @@ int64_t GetProofOfStakeReward(const CBlockIndex* pindexPrev, int64_t nCoinAge, i
     {
 		nSubsidy = 0 * COIN;  
     }	
-	if(pindexBest->nHeight+1 >= 2880 && pindexBest->nHeight+1 <= 30240)
+    else if(pindexBest->nHeight+1 >= 2880 && pindexBest->nHeight+1 <= 30240)
     {
 		nSubsidy = 25 * COIN;  
     }
@@ -1051,32 +1051,54 @@ int64_t GetProofOfStakeReward(const CBlockIndex* pindexPrev, int64_t nCoinAge, i
 	if (fDebug && GetBoolArg("-printcreation", false))
     LogPrint("creation", "GetProofOfStakeReward(): create=%s nCoinAge=%d\n", FormatMoney(nSubsidy), nCoinAge);
 
+
+
+
+    if(pindexBest->nHeight+1 >= 0 && pindexBest->nHeight+1 <= 2779)
+    {
+		nSubsidy = 0 * COIN;  
+    }	
+    else if(pindexBest->nHeight+1 >= 2880 && pindexBest->nHeight+1 <= 30240)
+    {
+		nSubsidy = 25 * COIN;  
+    }
+
+
+
     int avgHeight;
     int avgHeightRevert;
+    int avgHeightV2;
 
     if(TestNet())
     {
         avgHeight = AVG_FEE_START_BLOCK_TESTNET;
         avgHeightRevert  = AVG_FEE_START_BLOCK_TESTNET_REVERT;
+	avgHeightV2 = AVG_FEE_START_BLOCK_TESTNET_V2;
     }else{
         avgHeight = AVG_FEE_START_BLOCK;
 	avgHeightRevert = AVG_FEE_START_BLOCK_REVERT;
+        avgHeightV2 =  AVG_FEE_START_BLOCK_V2;
     }
 
 
 
 
-
-
-    if(pindexBest->nHeight+1 >= avgHeightRevert)
+   if(pindexBest->nHeight+1 >= avgHeightV2)
+    {
+        int64_t nRFee;
+	int curHeight =  (pindexBest->nHeight);
+        nRFee=GetRunningFee(nFees, curHeight);
+        return nSubsidy + nRFee;
+    }
+    else if(pindexBest->nHeight+1 >= avgHeightRevert)
     {
         return nSubsidy + nFees;
     }
     else if(pindexBest->nHeight+1 >= avgHeight)
     {
         int64_t nRFee;
-	int nHeight =  (pindexBest->nHeight+1);
-        nRFee=GetRunningFee(nFees, nHeight);
+	int curHeight =  (pindexBest->nHeight);
+        nRFee=GetRunningFee(nFees, curHeight);
         return nSubsidy + nRFee;
     }
     else
@@ -1094,13 +1116,13 @@ int64_t GetRunningFee(int64_t nFees, int curHeight){
     CBlock blockTmp;
     CTxDB txdb("r");
     CBlockIndex* pblockindexTmp = mapBlockIndex[hashBestChain];
-    
+    LogPrintf("---------------------->Getting fee for block :%d\n" , (curHeight+1));
     while (pblockindexTmp->nHeight > curHeight-(AVG_FEE_SPAN-1)){
         int64_t blockFee=0;
         if(mapFeeCache.count(pblockindexTmp->phashBlock)){
             blockFee=mapFeeCache[pblockindexTmp->phashBlock];
             if (blockFee > 0) {
-                LogPrintf("height=%d hash=%s---------------------->retreived block fee:%d\n",pblockindexTmp->nHeight,pblockindexTmp->phashBlock->ToString(),(int)blockFee);
+                LogPrintf("height=%d hash=%s---------------------->retreived block fee:%s\n",pblockindexTmp->nHeight,pblockindexTmp->phashBlock->ToString(),(int)blockFee);
             }
         }else{
                 uint256 hash = *pblockindexTmp->phashBlock;
@@ -2105,7 +2127,7 @@ bool CBlock::CheckBlock(bool fCheckPOW, bool fCheckMerkleRoot, bool fCheckSig) c
 
     // Check timestamp
     if (GetBlockTime() > FutureDriftV2(GetAdjustedTime()))
-        return error("CheckBlock() : block timestamp too far in the future");
+       return error("CheckBlock() : block timestamp too far in the future %n ",(FutureDriftV2(GetAdjustedTime())-GetBlockTime()));
 
     // First transaction must be coinbase, the rest must not be
     if (vtx.empty() || !vtx[0].IsCoinBase())
