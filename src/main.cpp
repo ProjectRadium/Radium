@@ -1103,7 +1103,12 @@ int64_t GetRunningFee(int64_t nFees, int curHeight){
     CBlock blockTmp;
     CTxDB txdb("r");
     CBlockIndex* pblockindexTmp = mapBlockIndex[hashBestChain];
-    LogPrintf("---------------------->Getting fee for block :%d\n" , (curHeight+1));
+    LogPrintf("---------------------->Getting fee for block :%d Current best %d\n" , (curHeight+1),pblockindexTmp->nHeight );
+
+    while (pblockindexTmp->nHeight > curHeight){
+	pblockindexTmp = pblockindexTmp->pprev;
+	}
+    LogPrintf("---------------------->Set Loop start block to block: %d\n",pblockindexTmp->nHeight );
     while (pblockindexTmp->nHeight > curHeight-(AVG_FEE_SPAN-1)){
         int64_t blockFee=0;
         if(mapFeeCache.count(pblockindexTmp->phashBlock)){
