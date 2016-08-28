@@ -990,59 +990,59 @@ int64_t GetProofOfStakeReward(const CBlockIndex* pindexPrev, int64_t nCoinAge, i
 {
 	
     int64_t nSubsidy = 5 * COIN;
-	if(pindexBest->nHeight+1 >= 0 && pindexBest->nHeight+1 <= 2779)
+	if(pindexPrev->nHeight+1 >= 0 && pindexPrev->nHeight+1 <= 2779)
     {
 		nSubsidy = 0 * COIN;  
     }	
-    else if(pindexBest->nHeight+1 >= 2880 && pindexBest->nHeight+1 <= 30240)
+    else if(pindexPrev->nHeight+1 >= 2880 && pindexPrev->nHeight+1 <= 30240)
     {
 		nSubsidy = 25 * COIN;  
     }
-    else if(pindexBest->nHeight+1 >= 30241 && pindexBest->nHeight+1 <= 337999)
+    else if(pindexPrev->nHeight+1 >= 30241 && pindexPrev->nHeight+1 <= 337999)
     {
 		nSubsidy = 5 * COIN;   // 5 coins per block until the re-branding
     }
-    else if(pindexBest->nHeight+1 >= 338000 && pindexBest->nHeight+1 <= 339439)
+    else if(pindexPrev->nHeight+1 >= 338000 && pindexPrev->nHeight+1 <= 339439)
     {
 		nSubsidy = 4.5 * COIN;   // 1st reward drop
     }
-    else if(pindexBest->nHeight+1 >=339440 && pindexBest->nHeight+1 <= 340879)
+    else if(pindexPrev->nHeight+1 >=339440 && pindexPrev->nHeight+1 <= 340879)
     {
 		nSubsidy = 4 * COIN;  // 2nd reward drop
     }
-    else if(pindexBest->nHeight+1 >= 340880 && pindexBest->nHeight+1 <= 342319)
+    else if(pindexPrev->nHeight+1 >= 340880 && pindexPrev->nHeight+1 <= 342319)
     {
 		nSubsidy = 3.5 * COIN;  // 3rd reward drop
     }
-    else if(pindexBest->nHeight+1 >= 342320 && pindexBest->nHeight+1 <= 343759)
+    else if(pindexPrev->nHeight+1 >= 342320 && pindexPrev->nHeight+1 <= 343759)
     {
 		nSubsidy = 3 * COIN;  // 4th reward drop
     }
-    else if(pindexBest->nHeight+1 >= 343760 && pindexBest->nHeight+1 <= 345199)
+    else if(pindexPrev->nHeight+1 >= 343760 && pindexPrev->nHeight+1 <= 345199)
     {
 		nSubsidy = 2.5 * COIN;  // 5th reward drop
     }
-    else if(pindexBest->nHeight+1 >= 345200 && pindexBest->nHeight+1 <= 346639)
+    else if(pindexPrev->nHeight+1 >= 345200 && pindexPrev->nHeight+1 <= 346639)
     {
 		nSubsidy = 2 * COIN;  // 6th reward drop
     }	
-    else if(pindexBest->nHeight+1 >= 346640 && pindexBest->nHeight+1 <= 348079)
+    else if(pindexPrev->nHeight+1 >= 346640 && pindexPrev->nHeight+1 <= 348079)
     {
 		nSubsidy = 1.5 * COIN;  // 7th reward drop
     }
-    else if(pindexBest->nHeight+1 >= 348080 && pindexBest->nHeight+1 <= 874359)
+    else if(pindexPrev->nHeight+1 >= 348080 && pindexPrev->nHeight+1 <= 874359)
     {
 		nSubsidy = 1 * COIN;  // 8th reward drop
     }
-    else if(pindexBest->nHeight+1 >= 874360 && pindexBest->nHeight+1 <= 1133559)
+    else if(pindexPrev->nHeight+1 >= 874360 && pindexPrev->nHeight+1 <= 1133559)
     {
                 nSubsidy = 0.75 * COIN; // First reward drop 6 months from the average fee fork.
     }
-    else if(pindexBest->nHeight+1 >= 1133560 && pindexBest->nHeight+1 <= 1392759)
+    else if(pindexPrev->nHeight+1 >= 1133560 && pindexPrev->nHeight+1 <= 1392759)
     {
                 nSubsidy = 0.5 * COIN; // Second reward drop 12 months from the average fee fork.
     }
-    else if(pindexBest->nHeight+1 >= 1392760)
+    else if(pindexPrev->nHeight+1 >= 1392760)
     {
                 nSubsidy = 0.25 * COIN; // Third and final reward drop 18 months from the average fee fork.
     }
