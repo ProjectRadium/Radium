@@ -1070,21 +1070,21 @@ int64_t GetProofOfStakeReward(const CBlockIndex* pindexPrev, int64_t nCoinAge, i
 
 
 
-   if(pindexBest->nHeight+1 >= avgHeightV2)
+   if(pindexPrev->nHeight+1 >= avgHeightV2)
     {
         int64_t nRFee;
-	int curHeight =  (pindexBest->nHeight);
+	int curHeight =  (pindexPrev->nHeight);
         nRFee=GetRunningFee(nFees, curHeight);
         return nSubsidy + nRFee;
     }
-    else if(pindexBest->nHeight+1 >= avgHeightRevert)
+    else if(pindexPrev->nHeight+1 >= avgHeightRevert)
     {
         return nSubsidy + nFees;
     }
-    else if(pindexBest->nHeight+1 >= avgHeight)
+    else if(pindexPrev->nHeight+1 >= avgHeight)
     {
         int64_t nRFee;
-	int curHeight =  (pindexBest->nHeight);
+	int curHeight =  (pindexPrev->nHeight);
         nRFee=GetRunningFee(nFees, curHeight);
         return nSubsidy + nRFee;
     }
