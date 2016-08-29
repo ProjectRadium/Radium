@@ -1114,7 +1114,7 @@ int64_t GetRunningFee(int64_t nFees, int curHeight){
         if(mapFeeCache.count(pblockindexTmp->phashBlock)){
             blockFee=mapFeeCache[pblockindexTmp->phashBlock];
             if (blockFee > 0) {
-                LogPrintf("height=%d hash=%s---------------------->retreived block fee:%s\n",pblockindexTmp->nHeight,pblockindexTmp->phashBlock->ToString(),(int)blockFee);
+                LogPrintf("---------------------->height=%d hash=%s retreived block fee:%s\n",pblockindexTmp->nHeight,pblockindexTmp->phashBlock->ToString(),(int)blockFee);
             }
         }else{
                 uint256 hash = *pblockindexTmp->phashBlock;
@@ -1141,7 +1141,7 @@ int64_t GetRunningFee(int64_t nFees, int curHeight){
                 blockFee=0;
                 }
                 mapFeeCache[pblockindexTmp->phashBlock]=blockFee;
-                LogPrintf("height=%d hash=%s---------------------->Calculated New Fee:%d\n",pblockindexTmp->nHeight,pblockindexTmp->phashBlock->ToString(),(int)blockFee);
+                LogPrintf("---------------------->height=%d hash=%s Calculated New Fee:%d\n",pblockindexTmp->nHeight,pblockindexTmp->phashBlock->ToString(),(int)blockFee);
         }
         nCumulatedFee+=blockFee;       
         if (!MoneyRange(nCumulatedFee)){
