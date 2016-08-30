@@ -153,7 +153,7 @@ static const signed int AVG_FEE_START_BLOCK_TESTNET_V2 = 164750;
 
 
 static const signed int AVG_FEE_SPAN = 1440;
-int64_t GetRunningFee(int64_t nFees, int curHeight);
+int64_t GetRunningFee(int64_t nFees, const CBlockIndex* pindexPrev);
 
 
 
