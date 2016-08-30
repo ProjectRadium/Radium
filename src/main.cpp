@@ -1073,8 +1073,8 @@ int64_t GetProofOfStakeReward(const CBlockIndex* pindexPrev, int64_t nCoinAge, i
    if(pindexPrev->nHeight+1 >= avgHeightV2)
     {
         int64_t nRFee;
-	int curHeight =  (pindexPrev->nHeight);
-        nRFee=GetRunningFee(nFees, curHeight);
+	
+        nRFee=GetRunningFee(nFees, pindexPrev);
         return nSubsidy + nRFee;
     }
     else if(pindexPrev->nHeight+1 >= avgHeightRevert)
@@ -1084,8 +1084,8 @@ int64_t GetProofOfStakeReward(const CBlockIndex* pindexPrev, int64_t nCoinAge, i
     else if(pindexPrev->nHeight+1 >= avgHeight)
     {
         int64_t nRFee;
-	int curHeight =  (pindexPrev->nHeight);
-        nRFee=GetRunningFee(nFees, curHeight);
+	
+        nRFee=GetRunningFee(nFees, pindexPrev);
         return nSubsidy + nRFee;
     }
     else
@@ -1096,20 +1096,21 @@ int64_t GetProofOfStakeReward(const CBlockIndex* pindexPrev, int64_t nCoinAge, i
 }
 
 //calculate fee average over AVG_FEE_SPAN blocks
-int64_t GetRunningFee(int64_t nFees, int curHeight){
+int64_t GetRunningFee(int64_t nFees,  const CBlockIndex* pindexPrev){
     int64_t nRFee=0;
     int64_t nCumulatedFee=0;
     int feesCount=0;
+    int startHeight = pindexPrev->nHeight;
     CBlock blockTmp;
     CTxDB txdb("r");
-    CBlockIndex* pblockindexTmp = mapBlockIndex[hashBestChain];
-    LogPrintf("---------------------->Getting fee for block :%d Current best %d\n" , (curHeight+1),pblockindexTmp->nHeight );
+    //dont know if this line is needed or not. Probally not?
+    const CBlockIndex* pblockindexTmp = pindexPrev;
+    LogPrintf("---------------------->Getting fee for block :%d Current best %d\n" , pindexPrev->nHeight+1 ,pblockindexTmp->nHeight );
 
-    while (pblockindexTmp->nHeight > curHeight){
-	pblockindexTmp = pblockindexTmp->pprev;
-	}
-    LogPrintf("---------------------->Set Loop start block to block: %d\n",pblockindexTmp->nHeight );
-    while (pblockindexTmp->nHeight > curHeight-(AVG_FEE_SPAN-1)){
+   
+    LogPrintf("---------------------->Loop start block: %d\n",pblockindexTmp->nHeight );
+    LogPrintf("---------------------->Loop start hash: %s\n",pblockindexTmp->phashBlock->ToString());
+    while (pblockindexTmp->nHeight > startHeight-(AVG_FEE_SPAN-1)){
         int64_t blockFee=0;
         if(mapFeeCache.count(pblockindexTmp->phashBlock)){
             blockFee=mapFeeCache[pblockindexTmp->phashBlock];
