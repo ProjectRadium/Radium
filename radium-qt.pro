@@ -1,6 +1,6 @@
 TEMPLATE = app
-TARGET = Radium-qt-1.4.4.3
-VERSION = 1.4.4.3
+TARGET = Radium-qt-1.4.4.5
+VERSION = 1.4.4.5
 INCLUDEPATH += src src/json src/qt
 QT += network
 DEFINES += ENABLE_WALLET
