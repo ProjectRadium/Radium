@@ -73,7 +73,7 @@ size_t nOrphanBlocksSize = 0;
 
 map<uint256, CTransaction> mapOrphanTransactions;
 map<uint256, set<uint256> > mapOrphanTransactionsByPrev;
-map<int,int64_t> mapFeeCache;
+map<const uint256* ,int64_t> mapFeeCache;
 
 // Constant stuff for coinbase transactions we create:
 CScript COINBASE_FLAGS;
@@ -990,59 +990,59 @@ int64_t GetProofOfStakeReward(const CBlockIndex* pindexPrev, int64_t nCoinAge, i
 {
 	
     int64_t nSubsidy = 5 * COIN;
-	if(pindexBest->nHeight+1 >= 0 && pindexBest->nHeight+1 <= 2779)
+	if(pindexPrev->nHeight+1 >= 0 && pindexPrev->nHeight+1 <= 2779)
     {
 		nSubsidy = 0 * COIN;  
     }	
-	if(pindexBest->nHeight+1 >= 2880 && pindexBest->nHeight+1 <= 30240)
+    else if(pindexPrev->nHeight+1 >= 2880 && pindexPrev->nHeight+1 <= 30240)
     {
 		nSubsidy = 25 * COIN;  
     }
-    else if(pindexBest->nHeight+1 >= 30241 && pindexBest->nHeight+1 <= 337999)
+    else if(pindexPrev->nHeight+1 >= 30241 && pindexPrev->nHeight+1 <= 337999)
     {
 		nSubsidy = 5 * COIN;   // 5 coins per block until the re-branding
     }
-    else if(pindexBest->nHeight+1 >= 338000 && pindexBest->nHeight+1 <= 339439)
+    else if(pindexPrev->nHeight+1 >= 338000 && pindexPrev->nHeight+1 <= 339439)
     {
 		nSubsidy = 4.5 * COIN;   // 1st reward drop
     }
-    else if(pindexBest->nHeight+1 >=339440 && pindexBest->nHeight+1 <= 340879)
+    else if(pindexPrev->nHeight+1 >=339440 && pindexPrev->nHeight+1 <= 340879)
     {
 		nSubsidy = 4 * COIN;  // 2nd reward drop
     }
-    else if(pindexBest->nHeight+1 >= 340880 && pindexBest->nHeight+1 <= 342319)
+    else if(pindexPrev->nHeight+1 >= 340880 && pindexPrev->nHeight+1 <= 342319)
     {
 		nSubsidy = 3.5 * COIN;  // 3rd reward drop
     }
-    else if(pindexBest->nHeight+1 >= 342320 && pindexBest->nHeight+1 <= 343759)
+    else if(pindexPrev->nHeight+1 >= 342320 && pindexPrev->nHeight+1 <= 343759)
     {
 		nSubsidy = 3 * COIN;  // 4th reward drop
     }
-    else if(pindexBest->nHeight+1 >= 343760 && pindexBest->nHeight+1 <= 345199)
+    else if(pindexPrev->nHeight+1 >= 343760 && pindexPrev->nHeight+1 <= 345199)
     {
 		nSubsidy = 2.5 * COIN;  // 5th reward drop
     }
-    else if(pindexBest->nHeight+1 >= 345200 && pindexBest->nHeight+1 <= 346639)
+    else if(pindexPrev->nHeight+1 >= 345200 && pindexPrev->nHeight+1 <= 346639)
     {
 		nSubsidy = 2 * COIN;  // 6th reward drop
     }	
-    else if(pindexBest->nHeight+1 >= 346640 && pindexBest->nHeight+1 <= 348079)
+    else if(pindexPrev->nHeight+1 >= 346640 && pindexPrev->nHeight+1 <= 348079)
     {
 		nSubsidy = 1.5 * COIN;  // 7th reward drop
     }
-    else if(pindexBest->nHeight+1 >= 348080 && pindexBest->nHeight+1 <= 874359)
+    else if(pindexPrev->nHeight+1 >= 348080 && pindexPrev->nHeight+1 <= 874359)
     {
 		nSubsidy = 1 * COIN;  // 8th reward drop
     }
-    else if(pindexBest->nHeight+1 >= 874360 && pindexBest->nHeight+1 <= 1133559)
+    else if(pindexPrev->nHeight+1 >= 874360 && pindexPrev->nHeight+1 <= 1133559)
     {
                 nSubsidy = 0.75 * COIN; // First reward drop 6 months from the average fee fork.
     }
-    else if(pindexBest->nHeight+1 >= 1133560 && pindexBest->nHeight+1 <= 1392759)
+    else if(pindexPrev->nHeight+1 >= 1133560 && pindexPrev->nHeight+1 <= 1392759)
     {
                 nSubsidy = 0.5 * COIN; // Second reward drop 12 months from the average fee fork.
     }
-    else if(pindexBest->nHeight+1 >= 1392760)
+    else if(pindexPrev->nHeight+1 >= 1392760)
     {
                 nSubsidy = 0.25 * COIN; // Third and final reward drop 18 months from the average fee fork.
     }
@@ -1051,23 +1051,41 @@ int64_t GetProofOfStakeReward(const CBlockIndex* pindexPrev, int64_t nCoinAge, i
 	if (fDebug && GetBoolArg("-printcreation", false))
     LogPrint("creation", "GetProofOfStakeReward(): create=%s nCoinAge=%d\n", FormatMoney(nSubsidy), nCoinAge);
 
+
     int avgHeight;
+    int avgHeightRevert;
+    int avgHeightV2;
 
     if(TestNet())
     {
         avgHeight = AVG_FEE_START_BLOCK_TESTNET;
-    }else{
+        avgHeightRevert  = AVG_FEE_START_BLOCK_TESTNET_REVERT;
+	      avgHeightV2 = AVG_FEE_START_BLOCK_TESTNET_V2;
+    }
+    else
+    {
         avgHeight = AVG_FEE_START_BLOCK;
+	      avgHeightRevert = AVG_FEE_START_BLOCK_REVERT;
+        avgHeightV2 =  AVG_FEE_START_BLOCK_V2;
     }
 
-    if(pindexBest->nHeight+1 >= AVG_FEE_START_BLOCK_REVERT)
+
+   if(pindexPrev->nHeight+1 >= avgHeightV2)
+    {
+        int64_t nRFee;
+
+        nRFee=GetRunningFee(nFees, pindexPrev);
+        return nSubsidy + nRFee;
+    }
+    else if(pindexPrev->nHeight+1 >= avgHeightRevert)
     {
         return nSubsidy + nFees;
     }
-    else if(pindexBest->nHeight+1 >= avgHeight)
+    else if(pindexPrev->nHeight+1 >= avgHeight)
     {
         int64_t nRFee;
-        nRFee=GetRunningFee(nFees);
+
+        nRFee=GetRunningFee(nFees, pindexPrev);
         return nSubsidy + nRFee;
     }
     else
@@ -1078,18 +1096,27 @@ int64_t GetProofOfStakeReward(const CBlockIndex* pindexPrev, int64_t nCoinAge, i
 }
 
 //calculate fee average over AVG_FEE_SPAN blocks
-int64_t GetRunningFee(int64_t nFees){
+int64_t GetRunningFee(int64_t nFees,  const CBlockIndex* pindexPrev){
     int64_t nRFee=0;
     int64_t nCumulatedFee=0;
     int feesCount=0;
+    int startHeight = pindexPrev->nHeight;
     CBlock blockTmp;
     CTxDB txdb("r");
-    CBlockIndex* pblockindexTmp = mapBlockIndex[hashBestChain];
-    int curHeight= pblockindexTmp->nHeight;
-    while (pblockindexTmp->nHeight > curHeight-(AVG_FEE_SPAN-1)){
+    //dont know if this line is needed or not. Probally not?
+    const CBlockIndex* pblockindexTmp = pindexPrev;
+    LogPrintf("---------------------->Getting fee for block :%d Current best %d\n" , pindexPrev->nHeight+1 ,pblockindexTmp->nHeight );
+
+
+    LogPrintf("---------------------->Loop start block: %d\n hash: %s\n",pblockindexTmp->nHeight ,pblockindexTmp->phashBlock->ToString() );
+    //LogPrintf("---------------------->Loop start hash: %s\n",pblockindexTmp->phashBlock->ToString());
+    while (pblockindexTmp->nHeight > startHeight-(AVG_FEE_SPAN-1)){
         int64_t blockFee=0;
-        if(mapFeeCache.count(pblockindexTmp->nHeight)){
-            blockFee=mapFeeCache[pblockindexTmp->nHeight];
+        if(mapFeeCache.count(pblockindexTmp->phashBlock)){
+            blockFee=mapFeeCache[pblockindexTmp->phashBlock];
+            if (blockFee > 0) {
+               // LogPrintf("---------------------->height=%d hash=%s retreived block fee:%s\n",pblockindexTmp->nHeight,pblockindexTmp->phashBlock->ToString(),(int)blockFee);
+            }
         }else{
                 uint256 hash = *pblockindexTmp->phashBlock;
                 pblockindexTmp = mapBlockIndex[hash];
@@ -1114,13 +1141,14 @@ int64_t GetRunningFee(int64_t nFees){
                 if (!MoneyRange(blockFee)){
                 blockFee=0;
                 }
-                mapFeeCache[pblockindexTmp->nHeight]=blockFee;
+                mapFeeCache[pblockindexTmp->phashBlock]=blockFee;
+                //LogPrintf("---------------------->height=%d hash=%s Calculated New Fee:%d\n",pblockindexTmp->nHeight,pblockindexTmp->phashBlock->ToString(),(int)blockFee);
         }
         nCumulatedFee+=blockFee;       
         if (!MoneyRange(nCumulatedFee)){
         nCumulatedFee=0;
         }
-       // LogPrintf("%d---------------------->blockFee:%d\n",pblockindexTmp->nHeight,(int)blockFee);
+        //LogPrintf("%d---------------------->blockFee:%d\n",pblockindexTmp->phashBlock,(int)blockFee);
        // LogPrintf("---------------------->nCumulatedFee:%d\n",(int)nCumulatedFee);
        // LogPrintf("---------------------->count:%d\n",(int)feesCount);
        // LogPrintf("---------------------->avg:%d\n",(int64_t)((nCumulatedFee+nFees)/(feesCount+1)));

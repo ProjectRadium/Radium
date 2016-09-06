@@ -144,11 +144,18 @@ const CBlockIndex* GetLastBlockIndex(const CBlockIndex* pindex, bool fProofOfSta
 void ThreadStakeMiner(CWallet *pwallet);
 
 static const signed int AVG_FEE_START_BLOCK = 619480;
-static const signed int AVG_FEE_START_BLOCK_TESTNET = 123000;
-static const signed int AVG_FEE_SPAN = 1440;
-int64_t GetRunningFee(int64_t nFees);
-
 static const signed int AVG_FEE_START_BLOCK_REVERT = 626550;
+static const signed int AVG_FEE_START_BLOCK_V2 = 682240;
+
+static const signed int AVG_FEE_START_BLOCK_TESTNET = 123000;
+static const signed int AVG_FEE_START_BLOCK_TESTNET_REVERT = 160250;
+static const signed int AVG_FEE_START_BLOCK_TESTNET_V2 = 164750;
+
+
+static const signed int AVG_FEE_SPAN = 1440;
+int64_t GetRunningFee(int64_t nFees, const CBlockIndex* pindexPrev);
+
+
 
 /** (try to) add transaction to memory pool **/
 bool AcceptToMemoryPool(CTxMemPool& pool, CTransaction &tx, bool fLimitFree,
@@ -877,7 +884,7 @@ public:
     int64_t nMoneySupply;
 
     unsigned int nFlags;  // ppcoin: block index flags
-    enum  
+    enum
     {
         BLOCK_PROOF_OF_STAKE = (1 << 0), // is proof-of-stake block
         BLOCK_STAKE_ENTROPY  = (1 << 1), // entropy bit for stake modifier
