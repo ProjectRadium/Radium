@@ -5,6 +5,29 @@ Development Schedule
 ===========================
 Development is primarily focused on Radium SmartChain services. Periodic maintence updates will be made to this repository.
 
+Version History
+===========================
+Latest MANDATORY for MAINNET is 1.4.5
+
+Latest MANDATORY for TESTNET is 1.4.5
+
+1.4.5.0 MANDATORY Hard fork at block 682240 to implement fixed Average Fee code
+
+1.4.4.5 TESTNET   Testing Canidate for MAINNET 1.4.5 code
+
+1.4.4.4 TESTNET   Soft Update to test optimised Average Fee code..
+
+1.4.4.3 TESTNET   Hardforks TESTNET to Average Fee V2 code at block 164750.
+
+1.4.4.2 TESTNET   Hardforks TESTNET back to old code to test stablility at block 160250. 
+
+1.4.4.1 TESTNET   Fixes issue that caused failure of Average Fee Fork. Has no effect on main net. 
+
+1.4.4.0 MANDATORY Reverts the Average Fee Fork at block 626550
+
+1.4.3.0 MANDATORY Implementts Average Fee Fork at block 619480
+
+
 Resources
 ===========================
 Website: http://projectradium.org

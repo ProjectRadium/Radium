@@ -3,7 +3,7 @@
 <plist version="0.9">
 <dict>
 	<key>CFBundleIconFile</key>
-	<string>bitcoin.icns</string>
+	<string>radium.icns</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleGetInfoString</key>
@@ -11,7 +11,7 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleExecutable</key>
-	<string>radium-Qt</string>
+	<string>Radium-Qt</string>
 	<key>CFBundleIdentifier</key>
 	<string>co.radium.radium-Qt</string>
         <key>CFBundleURLTypes</key>

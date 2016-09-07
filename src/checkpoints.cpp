@@ -40,6 +40,8 @@ namespace Checkpoints
         ( 619480,   uint256("0x17895abf56169141d553891d00a4c46d37023250a0089800e389bfba37e91f9a") ) // avg_fee start block
         ( 625249,   uint256("0x677def44b35e162452fb12f00c4e4fa5f1339a90a4b82753266e1cd9f5b359e7") ) // problem block on avg_fee
         ( 626372,   uint256("0x977494d951029df80bee05bdd461e6e767c916c2b60ebd356133c38ae5cf5823") ) // pre avg_fee revert block
+        ( 626555,   uint256("0xab4e8bdd76283070e11377f9497d7a644d9a813fc354152b36ded76d68eb5388") ) // post avg_fee revert block
+        ( 655200,   uint256("0xab4e8bdd76283070e11377f9497d7a644d9a813fc354152b36ded76d68eb5388") ) // Radium 1.4.5 Code release
       ;
 
     // TestNet has no checkpoints
